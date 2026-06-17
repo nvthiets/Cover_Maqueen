@@ -135,7 +135,7 @@ namespace Cover_Maqueen {
         setPwm(in1, 0, 0); setPwm(in2, 0, 0);
     }
 
-     // ==========================================
+    // ==========================================
     // NHÓM: CẢM BIẾN
     // ==========================================
 
@@ -190,15 +190,33 @@ namespace Cover_Maqueen {
 // ==========================================
 //% weight=90 color=#0078D7 icon="\uf0eb" block="WS2812"
 namespace Expansion_WS2812 {
-    let strips: neopixel.Strip[] = [];
+    // Biến lưu trữ dải LED đang hoạt động
+    let activeStrip: neopixel.Strip = null;
+    let _activePin = DigitalPin.P8; // Mặc định phần cứng của mạch
+    let _activeCount = 4;           // Mặc định 4 bóng
     let _brightness = 100;
 
-    function getStrip(pin: DigitalPin): neopixel.Strip {
-        if (!strips[pin]) {
-            strips[pin] = neopixel.create(pin, 4, NeoPixelMode.RGB);
-            strips[pin].setBrightness(_brightness);
+    // --- KHỐI LỆNH CÀI ĐẶT ---
+    //% block="Cài đặt dải LED tại chân %pin với %numLeds bóng"
+    //% pin.defl=DigitalPin.P8 numLeds.defl=4
+    //% weight=110
+    export function setupLED(pin: DigitalPin, numLeds: number): void {
+        _activePin = pin;
+        _activeCount = numLeds;
+        activeStrip = neopixel.create(_activePin, _activeCount, NeoPixelMode.RGB);
+        activeStrip.setBrightness(_brightness);
+        activeStrip.clear();
+        activeStrip.show();
+    }
+
+    // --- HÀM NỘI BỘ XỬ LÝ FAIL-SAFE ---
+    // Nếu người dùng quên gọi lệnh cài đặt, hệ thống sẽ tự động khởi tạo theo mặc định
+    function getStrip(): neopixel.Strip {
+        if (!activeStrip) {
+            activeStrip = neopixel.create(_activePin, _activeCount, NeoPixelMode.RGB);
+            activeStrip.setBrightness(_brightness);
         }
-        return strips[pin];
+        return activeStrip;
     }
 
     export enum NeoPixelColors {
@@ -224,49 +242,47 @@ namespace Expansion_WS2812 {
         Black = 0x000000
     }
 
-    //% block="chỉnh độ sáng LED RGB thành %brightness"
-    //% brightness.min=0 brightness.max=255
+    // --- CÁC KHỐI LỆNH THỰC THI (ĐÃ BỎ CHỌN CHÂN) ---
+
+    //% block="Độ sáng LED thành %brightness"
+    //% brightness.min=0 brightness.max=255 brightness.defl=100
     //% weight=100
     export function setBrightness(brightness: number): void {
         _brightness = brightness;
-        for (let i = 0; i < strips.length; i++) {
-            if (strips[i]) {
-                strips[i].setBrightness(_brightness);
-                strips[i].show();
-            }
+        if (activeStrip) {
+            activeStrip.setBrightness(_brightness);
+            activeStrip.show();
         }
     }
 
-    //% block="chân %pin bật toàn bộ LED RGB màu %color"
-    //% pin.defl=DigitalPin.P8
+    //% block="Bật toàn bộ LED màu %color"
     //% weight=90
-    export function showColor(pin: DigitalPin, color: NeoPixelColors): void {
-        let s = getStrip(pin);
-        s.showColor(color);
+    export function showColor(color: NeoPixelColors): void {
+        getStrip().showColor(color);
     }
 
-    //% block="chân %pin dải từ bóng %start số lượng %count sáng màu %color"
-    //% pin.defl=DigitalPin.P8
+    //% block="Bật màu %color cho %count bóng từ vị trí %start"
+    //% inlineInputMode=inline
+    //% start.defl=0 count.defl=4
     //% weight=75
-    export function showRangeColor(pin: DigitalPin, start: number, count: number, color: NeoPixelColors): void {
-        let s = getStrip(pin);
-        let range = s.range(start, count);
+    export function showRangeColor(color: NeoPixelColors, count: number, start: number): void {
+        let s = getStrip();
+        let range = s.range(start, count); // Ở đây vẫn phải giữ đúng thứ tự hàm gốc của neopixel
         range.showColor(color);
     }
 
-    //% block="chân %pin bật hiệu ứng cầu vồng từ %startHue đến %endHue"
-    //% pin.defl=DigitalPin.P8
+    //% block="Hiệu ứng cầu vồng từ màu %startHue đến %endHue"
+    //% inlineInputMode=inline
+    //% startHue.defl=1 endHue.defl=360
     //% weight=60
-    export function showRainbow(pin: DigitalPin, startHue: number, endHue: number): void {
-        let s = getStrip(pin);
-        s.showRainbow(startHue, endHue);
+    export function showRainbow(startHue: number, endHue: number): void {
+        getStrip().showRainbow(startHue, endHue);
     }
 
-    //% block="chân %pin tắt toàn bộ LED RGB"
-    //% pin.defl=DigitalPin.P8
+    //% block="Tắt toàn bộ LED"
     //% weight=50
-    export function clearAll(pin: DigitalPin): void {
-        let s = getStrip(pin);
+    export function clearAll(): void {
+        let s = getStrip();
         s.clear();
         s.show();
     }
