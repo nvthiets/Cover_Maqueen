@@ -95,7 +95,6 @@ namespace Cover_Maqueen {
 
     //% block="Servo PCA9685 |%channel| quay %degree độ"
     //% weight=99 degree.min=0 degree.max=180
-    //% group="Cơ cấu chấp hành (PCA9685)"
     export function servoPCA9685(channel: ServoChannel, degree: number): void {
         if (!initialized) initPCA9685();
         let v_us = (degree * 1800 / 180 + 600);
@@ -105,7 +104,6 @@ namespace Cover_Maqueen {
 
     //% block="Động cơ %motor chạy %dir tốc độ %speed"
     //% weight=97 speed.min=0 speed.max=100
-    //% group="Cơ cấu chấp hành (PCA9685)"
     export function motorControl(motor: MotorNum, dir: MotorDir, speed: number): void {
         if (!initialized) initPCA9685();
         let in1 = 0, in2 = 0;
@@ -127,7 +125,7 @@ namespace Cover_Maqueen {
     }
 
     //% block="Dừng động cơ %motor"
-    //% weight=95 group="Cơ cấu chấp hành (PCA9685)"
+    //% weight=95 
     export function motorStop(motor: MotorNum): void {
         if (!initialized) initPCA9685();
         let in1 = (motor == MotorNum.M1) ? 3 : 0;
@@ -140,7 +138,7 @@ namespace Cover_Maqueen {
     // ==========================================
 
     //% block="đọc khoảng cách siêu âm (cm)"
-    //% weight=89 group="Cảm biến"
+    //% weight=89 
     export function readUltrasonic(): number {
         let trig = DigitalPin.P13;
         let echo = DigitalPin.P14;
@@ -161,7 +159,7 @@ namespace Cover_Maqueen {
     }
 
     //% block="đọc giá trị số dò line chân %pin"
-    //% weight=88 group="Cảm biến"
+    //% weight=88 "
     export function readLineDigital(pin: LinePins): number {
         if (pin == LinePins.P0) {
             return pins.digitalReadPin(DigitalPin.P0);
@@ -173,7 +171,7 @@ namespace Cover_Maqueen {
     }
 
     //% block="đọc giá trị tương tự dò line chân %pin"
-    //% weight=87 group="Cảm biến"
+    //% weight=87 
     export function readLineAnalog(pin: LinePins): number {
         if (pin == LinePins.P0) {
             return pins.analogReadPin(AnalogPin.P0);
@@ -284,6 +282,28 @@ namespace Expansion_WS2812 {
     export function clearAll(): void {
         let s = getStrip();
         s.clear();
+        s.show();
+    }
+
+    //% block="Đỏ %r Xanh lá %g Xanh dương %b"
+    //% r.min=0 r.max=255 g.min=0 g.max=255 b.min=0 b.max=255
+    //% weight=88 group="Màu tuỳ chỉnh"
+    export function rgb(r: number, g: number, b: number): number {
+        return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+    }
+
+    //% block="Bật toàn bộ LED màu %color"
+    //% weight=89 group="Màu tuỳ chỉnh"
+    export function showCustomColor(color: number): void {
+        let s = getStrip();
+        s.showColor(color);
+    }
+
+    //% block="Bóng số %index sáng màu %color"
+    //% weight=87 group="Màu tuỳ chỉnh"
+    export function showPixelCustomColor(index: number, color: number): void {
+        let s = getStrip();
+        s.setPixelColor(index, color);
         s.show();
     }
 }
