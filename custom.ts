@@ -1,8 +1,7 @@
 // ==========================================
-// TAB 1: ĐIỀU KHIỂN ĐỘNG CƠ, SERVO & CẢM BIẾN
+// TAB 1: MOTOR, SERVO & SENSOR CONTROL
 // ==========================================
 //% weight=100 color=#0fbc11 icon="\uf11b" block="Cover_Maqueen"
-//namespace Exansion_Microbit {
 namespace Cover_Maqueen {
     export enum MotorNum {
         //% block="M1"
@@ -12,9 +11,9 @@ namespace Cover_Maqueen {
     }
 
     export enum MotorDir {
-        //% block="Thuận"
+        //% block="Forward"
         Forward = 1,
-        //% block="Ngược"
+        //% block="Reverse"
         Reverse = 2
     }
 
@@ -90,10 +89,10 @@ namespace Cover_Maqueen {
     }
 
     // ==========================================
-    // NHÓM: CƠ CẤU CHẤP HÀNH (PCA9685)
+    // ACTUATORS (PCA9685)
     // ==========================================
 
-    //% block="Servo PCA9685 |%channel| quay %degree độ"
+    //% block="PCA9685 Servo |%channel| set angle %degree°"
     //% weight=99 degree.min=0 degree.max=180
     export function servoPCA9685(channel: ServoChannel, degree: number): void {
         if (!initialized) initPCA9685();
@@ -102,7 +101,7 @@ namespace Cover_Maqueen {
         setPwm(channel, 0, value);
     }
 
-    //% block="Động cơ %motor chạy %dir tốc độ %speed"
+    //% block="Motor %motor run %dir at speed %speed"
     //% weight=97 speed.min=0 speed.max=100
     export function motorControl(motor: MotorNum, dir: MotorDir, speed: number): void {
         if (!initialized) initPCA9685();
@@ -124,7 +123,7 @@ namespace Cover_Maqueen {
         }
     }
 
-    //% block="Dừng động cơ %motor"
+    //% block="Stop motor %motor"
     //% weight=95 
     export function motorStop(motor: MotorNum): void {
         if (!initialized) initPCA9685();
@@ -134,10 +133,10 @@ namespace Cover_Maqueen {
     }
 
     // ==========================================
-    // NHÓM: CẢM BIẾN
+    // SENSORS
     // ==========================================
 
-    //% block="đọc khoảng cách siêu âm (cm)"
+    //% block="Read ultrasonic distance (cm)"
     //% weight=89 
     export function readUltrasonic(): number {
         let trig = DigitalPin.P13;
@@ -158,8 +157,8 @@ namespace Cover_Maqueen {
         return (distance <= 0 || distance > 400) ? 400 : Math.round(distance);
     }
 
-    //% block="đọc giá trị số dò line chân %pin"
-    //% weight=88 "
+    //% block="Read digital line sensor at pin %pin"
+    //% weight=88
     export function readLineDigital(pin: LinePins): number {
         if (pin == LinePins.P0) {
             return pins.digitalReadPin(DigitalPin.P0);
@@ -170,7 +169,7 @@ namespace Cover_Maqueen {
         }
     }
 
-    //% block="đọc giá trị tương tự dò line chân %pin"
+    //% block="Read analog line sensor at pin %pin"
     //% weight=87 
     export function readLineAnalog(pin: LinePins): number {
         if (pin == LinePins.P0) {
@@ -184,18 +183,16 @@ namespace Cover_Maqueen {
 }
 
 // ==========================================
-// TAB 2: ĐIỀU KHIỂN LED WS2812 
+// TAB 2: WS2812 LED CONTROL
 // ==========================================
 //% weight=90 color=#0078D7 icon="\uf0eb" block="WS2812"
 namespace Expansion_WS2812 {
-    // Biến lưu trữ dải LED đang hoạt động
     let activeStrip: neopixel.Strip = null;
-    let _activePin = DigitalPin.P8; // Mặc định phần cứng của mạch
-    let _activeCount = 4;           // Mặc định 4 bóng
+    let _activePin = DigitalPin.P8;
+    let _activeCount = 4;
     let _brightness = 100;
 
-    // --- KHỐI LỆNH CÀI ĐẶT ---
-    //% block="Cài đặt dải LED tại chân %pin với %numLeds bóng"
+    //% block="Setup LED strip at pin %pin with %numLeds LEDs"
     //% pin.defl=DigitalPin.P8 numLeds.defl=4
     //% weight=110
     export function setupLED(pin: DigitalPin, numLeds: number): void {
@@ -207,8 +204,6 @@ namespace Expansion_WS2812 {
         activeStrip.show();
     }
 
-    // --- HÀM NỘI BỘ XỬ LÝ FAIL-SAFE ---
-    // Nếu người dùng quên gọi lệnh cài đặt, hệ thống sẽ tự động khởi tạo theo mặc định
     function getStrip(): neopixel.Strip {
         if (!activeStrip) {
             activeStrip = neopixel.create(_activePin, _activeCount, NeoPixelMode.RGB);
@@ -218,31 +213,29 @@ namespace Expansion_WS2812 {
     }
 
     export enum NeoPixelColors {
-        //% block="đỏ"
+        //% block="Red"
         Red = 0xFF0000,
-        //% block="cam"
+        //% block="Orange"
         Orange = 0xFFA500,
-        //% block="vàng"
+        //% block="Yellow"
         Yellow = 0xFFFF00,
-        //% block="xanh lá"
+        //% block="Green"
         Green = 0x00FF00,
-        //% block="xanh dương"
+        //% block="Blue"
         Blue = 0x0000FF,
-        //% block="chàm"
+        //% block="Indigo"
         Indigo = 0x4b0082,
-        //% block="tím"
+        //% block="Violet"
         Violet = 0x8a2be2,
-        //% block="tím hồng"
+        //% block="Purple"
         Purple = 0xFF00FF,
-        //% block="trắng"
+        //% block="White"
         White = 0xFFFFFF,
-        //% block="đen (tắt)"
+        //% block="Black (Off)"
         Black = 0x000000
     }
 
-    // --- CÁC KHỐI LỆNH THỰC THI (ĐÃ BỎ CHỌN CHÂN) ---
-
-    //% block="Độ sáng LED thành %brightness"
+    //% block="Set LED brightness to %brightness"
     //% brightness.min=0 brightness.max=255 brightness.defl=100
     //% weight=100
     export function setBrightness(brightness: number): void {
@@ -253,23 +246,23 @@ namespace Expansion_WS2812 {
         }
     }
 
-    //% block="Bật toàn bộ LED màu %color"
+    //% block="Show color %color on all LEDs"
     //% weight=90
     export function showColor(color: NeoPixelColors): void {
         getStrip().showColor(color);
     }
 
-    //% block="Bật màu %color cho %count bóng từ vị trí %start"
+    //% block="Show color %color for %count LEDs starting from %start"
     //% inlineInputMode=inline
     //% start.defl=0 count.defl=4
     //% weight=75
     export function showRangeColor(color: NeoPixelColors, count: number, start: number): void {
         let s = getStrip();
-        let range = s.range(start, count); // Ở đây vẫn phải giữ đúng thứ tự hàm gốc của neopixel
+        let range = s.range(start, count);
         range.showColor(color);
     }
 
-    //% block="Hiệu ứng cầu vồng từ màu %startHue đến %endHue"
+    //% block="Show rainbow effect from hue %startHue to %endHue"
     //% inlineInputMode=inline
     //% startHue.defl=1 endHue.defl=360
     //% weight=60
@@ -277,7 +270,7 @@ namespace Expansion_WS2812 {
         getStrip().showRainbow(startHue, endHue);
     }
 
-    //% block="Tắt toàn bộ LED"
+    //% block="Clear all LEDs"
     //% weight=50
     export function clearAll(): void {
         let s = getStrip();
@@ -285,22 +278,22 @@ namespace Expansion_WS2812 {
         s.show();
     }
 
-    //% block="Đỏ %r Xanh lá %g Xanh dương %b"
+    //% block="RGB color: Red %r Green %g Blue %b"
     //% r.min=0 r.max=255 g.min=0 g.max=255 b.min=0 b.max=255
-    //% weight=88 group="Màu tuỳ chỉnh"
+    //% weight=88 group="Custom Colors"
     export function rgb(r: number, g: number, b: number): number {
         return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
     }
 
-    //% block="Bật toàn bộ LED màu %color"
-    //% weight=89 group="Màu tuỳ chỉnh"
+    //% block="Show custom color %color on all LEDs"
+    //% weight=89 group="Custom Colors"
     export function showCustomColor(color: number): void {
         let s = getStrip();
         s.showColor(color);
     }
 
-    //% block="Bóng số %index sáng màu %color"
-    //% weight=87 group="Màu tuỳ chỉnh"
+    //% block="Show custom color %color on LED %index"
+    //% weight=87 group="Custom Colors"
     export function showPixelCustomColor(index: number, color: number): void {
         let s = getStrip();
         s.setPixelColor(index, color);
@@ -309,9 +302,9 @@ namespace Expansion_WS2812 {
 }
 
 // ==========================================
-// TAB 3: MẮT THU HỒNG NGOẠI IR 
+// TAB 3: INFRARED (IR) RECEIVER
 // ==========================================
-//% weight=85 color=#E3008C icon="\uf012" block="Hồng Ngoại IR"
+//% weight=85 color=#E3008C icon="\uf012" block="Infrared IR"
 namespace Expansion_IR {
     let irPin: DigitalPin;
     let lastCommand = -1;
@@ -324,43 +317,43 @@ namespace Expansion_IR {
     let receiving = false;
 
     export enum IRKeys {
-        //% block="Lên"
+        //% block="Up"
         Up = 0x18,
-        //% block="Xuống"
+        //% block="Down"
         Down = 0x52,
-        //% block="Trái"
+        //% block="Left"
         Left = 0x08,
-        //% block="Phải"
+        //% block="Right"
         Right = 0x5A,
         //% block="OK"
         OK = 0x1C,
-        //% block="Phím 1"
+        //% block="Num 1"
         Num1 = 0x45,
-        //% block="Phím 2"
+        //% block="Num 2"
         Num2 = 0x46,
-        //% block="Phím 3"
+        //% block="Num 3"
         Num3 = 0x47,
-        //% block="Phím 4"
+        //% block="Num 4"
         Num4 = 0x44,
-        //% block="Phím 5"
+        //% block="Num 5"
         Num5 = 0x40,
-        //% block="Phím 6"
+        //% block="Num 6"
         Num6 = 0x43,
-        //% block="Phím 7"
+        //% block="Num 7"
         Num7 = 0x07,
-        //% block="Phím 8"
+        //% block="Num 8"
         Num8 = 0x15,
-        //% block="Phím 9"
+        //% block="Num 9"
         Num9 = 0x09,
-        //% block="Phím 0"
+        //% block="Num 0"
         Num0 = 0x19,
-        //% block="* (Sao)"
+        //% block="* (Star)"
         Star = 0x16,
-        //% block="# (Thăng)"
+        //% block="# (Hash)"
         Hash = 0x0D,
     }
 
-    //% block="Khởi tạo mắt thu IR tại chân %pin"
+    //% block="Initialize IR receiver at pin %pin"
     //% pin.defl=DigitalPin.P15
     //% weight=100
     export function initIR(pin: DigitalPin): void {
@@ -400,7 +393,7 @@ namespace Expansion_IR {
         });
     }
 
-    //% block="Phím %key được bấm ?"
+    //% block="Is key %key pressed?"
     //% weight=90
     export function isKeyPressed(key: IRKeys): boolean {
         if (!irInitialized) return false;
@@ -411,7 +404,7 @@ namespace Expansion_IR {
         return false;
     }
 
-    //% block="Đọc mã HEX của phím"
+    //% block="Get IR key HEX code"
     //% weight=80
     export function getIrCode(): number {
         if (!irInitialized) return -1;
