@@ -188,15 +188,14 @@ namespace Cover_Maqueen {
 //% weight=90 color=#0078D7 icon="\uf0eb" block="WS2812"
 namespace Expansion_WS2812 {
     let activeStrip: neopixel.Strip = null;
-    let _activePin = DigitalPin.P8;
+    let _activePin = DigitalPin.P8; // Đã ghim chặt cứng vào chân P8
     let _activeCount = 4;
     let _brightness = 100;
 
-    //% block="Setup LED strip at pin %pin with %numLeds LEDs"
-    //% pin.defl=DigitalPin.P8 numLeds.defl=4
+    //% block="Setup LED strip at pin P8 with %numLeds LEDs"
+    //% numLeds.defl=4
     //% weight=110
-    export function setupLED(pin: DigitalPin, numLeds: number): void {
-        _activePin = pin;
+    export function setupLED(numLeds: number): void {
         _activeCount = numLeds;
         activeStrip = neopixel.create(_activePin, _activeCount, NeoPixelMode.RGB);
         activeStrip.setBrightness(_brightness);
@@ -278,29 +277,32 @@ namespace Expansion_WS2812 {
         s.show();
     }
 
+    // ==========================================
+    // CUSTOM RGB COLORS
+    // ==========================================
+
     //% block="RGB color: Red %r Green %g Blue %b"
     //% r.min=0 r.max=255 g.min=0 g.max=255 b.min=0 b.max=255
-    //% weight=88 group="Custom Colors"
+    //% weight=88
     export function rgb(r: number, g: number, b: number): number {
         return ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
     }
 
     //% block="Show custom color %color on all LEDs"
-    //% weight=89 group="Custom Colors"
+    //% weight=89
     export function showCustomColor(color: number): void {
         let s = getStrip();
         s.showColor(color);
     }
 
     //% block="Show custom color %color on LED %index"
-    //% weight=87 group="Custom Colors"
+    //% weight=87
     export function showPixelCustomColor(index: number, color: number): void {
         let s = getStrip();
         s.setPixelColor(index, color);
         s.show();
     }
 }
-
 // ==========================================
 // TAB 3: INFRARED (IR) RECEIVER
 // ==========================================
